@@ -30,6 +30,21 @@ Build with catalog update features to enable online game database integration:
 cargo install --path . --features catalog-update
 ```
 
+### Phase 2 Features (Intelligence & Prediction)
+
+Build with machine learning and analytics features:
+
+```bash
+# ML and intelligence features
+cargo install --path . --features ml-federated
+
+# Diagnostics and analytics
+cargo install --path . --features diagnostics
+
+# Full Phase 2 feature set
+cargo install --path . --features ml-federated,diagnostics,analytics
+```
+
 ### Full Features
 
 Build with all optional features:
@@ -47,7 +62,7 @@ cargo install --path . --features full
 - **Privacy-focused**: No telemetry or data collection
 - **Cross-platform**: Linux, Windows, and macOS support (with optional features)
 
-### Optional Features
+### Phase 1 Features (v0.2-v0.5)
 
 #### Catalog Automation (`catalog-update`)
 - **Steam API integration**: Fetch game metadata from Steam
@@ -70,6 +85,31 @@ cargo install --path . --features full
 - **Custom presets**: Save and load custom quality presets
 - **Behavior tuning**: Adjust assessment aggressiveness and thresholds
 
+### Phase 2 Features (v0.3-v0.9)
+
+#### Machine Learning Integration (`ml-local`, `ml-federated`)
+- **Local ML models**: Performance prediction using heuristic models
+- **Hardware-to-performance mapping**: Advanced FPS estimation algorithms
+- **Federated learning foundation**: Privacy-preserving model training framework
+- **Feature extraction**: Comprehensive hardware feature vectors for ML models
+
+#### Real-time Telemetry (`steam`, `diagnostics`)
+- **Enhanced Steam integration**: Playtime correlation and library analysis
+- **Community database**: Crowdsourced FPS reports and performance data
+- **Live compatibility data**: Real-time updates from community sources
+
+#### Advanced Diagnostics (`diagnostics`)
+- **System health check**: Comprehensive component health analysis
+- **Game-specific diagnostics**: Known issues, fixes, and configuration recommendations
+- **Remediation guidance**: Automated fix suggestions and manual troubleshooting steps
+- **Driver status**: GPU driver detection and Vulkan/DirectX support analysis
+
+#### Predictive Analytics (`analytics`)
+- **Upgrade recommendations**: Cost-benefit analysis for hardware upgrades
+- **Future game compatibility**: Assessment of upcoming game requirements
+- **Performance trending**: Historical performance analysis and degradation prediction
+- **Upgrade path planning**: Strategic hardware upgrade recommendations
+
 ## Use
 
 ### Basic Usage
@@ -89,6 +129,42 @@ ciri --update-catalog
 
 # Then use updated catalog
 ciri "New Game"
+```
+
+### ML-Powered Assessment (Phase 2)
+
+```bash
+# Build with ML features
+cargo install --path . --features ml-federated
+
+# ML-enhanced assessment
+ciri "Cyberpunk 2077" --target 1080p
+```
+
+### Diagnostics (Phase 2)
+
+```bash
+# Build with diagnostics features
+cargo install --path . --features diagnostics
+
+# System health check
+ciri --diagnose-system
+
+# Game-specific diagnostics
+ciri "Cyberpunk 2077" --diagnose-game
+```
+
+### Analytics (Phase 2)
+
+```bash
+# Build with analytics features
+cargo install --path . --features analytics
+
+# Upgrade recommendations
+ciri --analyze-upgrades
+
+# Future compatibility
+ciri "Upcoming Game" --future-compat
 ```
 
 ### Supported Targets
@@ -114,6 +190,7 @@ Ciri is designed with a modular architecture that maintains zero-dependency prin
 ```
 src/
 ├── assess/           # Assessment logic
+│   └── multi_factor.rs  # Advanced assessment algorithms
 ├── catalog/          # Game catalog management
 │   ├── embedded.rs   # Offline embedded catalog
 │   ├── steam_api.rs  # Steam integration (optional)
@@ -123,6 +200,16 @@ src/
 │   ├── linux.rs      # Linux detection (default)
 │   ├── windows.rs    # Windows detection (optional)
 │   └── macos.rs      # macOS detection (optional)
+├── ml/               # Machine learning (Phase 2)
+│   ├── models.rs     # ML model architectures
+│   ├── onnx_runtime.rs  # ONNX Runtime integration
+│   └── federated.rs  # Federated learning framework
+├── telemetry/        # Real-time data (Phase 2)
+│   └── mod.rs       # Steam and community integration
+├── diagnostics/      # System diagnostics (Phase 2)
+│   └── mod.rs       # Health checks and troubleshooting
+├── analytics/        # Predictive analytics (Phase 2)
+│   └── mod.rs       # Upgrade planning and forecasting
 ├── config.rs         # User configuration (optional)
 └── output.rs         # Output formatting
 ```
@@ -157,6 +244,15 @@ cargo test --features catalog-update
 # Test Windows detection
 cargo test --features windows-detection
 
+# Test ML features
+cargo test --features ml-federated
+
+# Test diagnostics
+cargo test --features diagnostics
+
+# Test analytics
+cargo test --features analytics
+
 # Test full feature set
 cargo test --features full
 ```
@@ -171,6 +267,18 @@ Ciri maintains a strong commitment to:
 4. **Optional enhancements**: Advanced features available via feature flags
 5. **Performance optimization**: Fast startup and low memory footprint
 6. **Cross-platform support**: Works on Linux, Windows, and macOS
+7. **Privacy-preserving ML**: Federated learning for model training without sharing raw data
+8. **Community-driven**: Crowdsourced data and collaborative improvement
+
+## Roadmap
+
+Ciri follows a comprehensive 3-phase roadmap:
+
+- **Phase 1 (v0.2-v0.5)**: Foundation - Catalog automation, enhanced hardware detection, configuration
+- **Phase 2 (v0.3-v0.9)**: Intelligence & Prediction - ML integration, real-time telemetry, diagnostics, analytics
+- **Phase 3 (v1.0-v1.5)**: Platform & Ecosystem - Web interface, cloud services, mobile apps, developer tools
+
+See [ROADMAP.md](ROADMAP.md) for detailed roadmap information.
 
 ## License
 

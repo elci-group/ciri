@@ -5,6 +5,14 @@ mod output;
 
 #[cfg(feature = "config")]
 mod config;
+#[cfg(any(feature = "ml-local", feature = "ml-federated"))]
+mod ml;
+#[cfg(any(feature = "steam", feature = "diagnostics"))]
+mod telemetry;
+#[cfg(feature = "diagnostics")]
+mod diagnostics;
+#[cfg(feature = "analytics")]
+mod analytics;
 
 use catalog::GAMES;
 
@@ -276,5 +284,59 @@ mod tests {
             );
             assert_eq!(run_impl(vec!["Spreadsheet Deluxe".into()]).unwrap_err().1, 3);
         }
+    }
+    
+    #[cfg(feature = "ml-local")]
+    #[test]
+    fn test_ml_integration() {
+        use ml::PerformancePredictor;
+        let predictor = PerformancePredictor::new();
+        assert!(predictor.is_ok());
+    }
+    
+    #[cfg(feature = "diagnostics")]
+    #[test]
+    fn test_diagnostics() {
+        use diagnostics::SystemHealth;
+        let hw = hardware::Hardware {
+            cpu_name: "Test CPU".into(),
+            cpu_score: 70,
+            logical_cores: 8,
+            gpu_name: "Test GPU".into(),
+            gpu_score: 70,
+            vram_gb: Some(8),
+            ram_gb: 16,
+            storage_gb: 500,
+            os: "Linux".into(),
+            is_linux: true,
+            is_laptop: false,
+            vulkan: true,
+        };
+        let health = SystemHealth::diagnose(&hw);
+        assert!(!health.recommendations.is_empty());
+    }
+    
+    #[cfg(feature = "analytics")]
+    #[test]
+    fn test_analytics() {
+        use analytics::UpgradeRecommendation;
+        use catalog::GAMES;
+        let hw = hardware::Hardware {
+            cpu_name: "Test CPU".into(),
+            cpu_score: 70,
+            logical_cores: 8,
+            gpu_name: "Test GPU".into(),
+            gpu_score: 70,
+            vram_gb: Some(8),
+            ram_gb: 16,
+            storage_gb: 500,
+            os: "Linux".into(),
+            is_linux: true,
+            is_laptop: false,
+            vulkan: true,
+        };
+        let games = &GAMES;
+        let recommendations = UpgradeRecommendation::analyze(&hw, games);
+        assert_eq!(recommendations.len(), 4);
     }
 }

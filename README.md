@@ -14,15 +14,65 @@ VERDICT
 
 ## Install
 
+### Basic Installation (Default Features)
+
 Build with a stable Rust toolchain:
 
 ```bash
 cargo install --path .
 ```
 
-Ciri currently targets Linux hardware detection. It reads CPU and memory information from `/proc`, detects the display adapter with `lspci`, checks free disk space with `df`, and uses `vulkaninfo` when available. Missing signals are reported as unknown and reduce confidence rather than becoming false failures.
+### With Catalog Updates
+
+Build with catalog update features to enable online game database integration:
+
+```bash
+cargo install --path . --features catalog-update
+```
+
+### Full Features
+
+Build with all optional features:
+
+```bash
+cargo install --path . --features full
+```
+
+## Features
+
+### Core Features (Default)
+- **Offline-first**: Works without network access with embedded game catalog
+- **Zero dependencies**: Pure Rust implementation with no external dependencies
+- **Fast and efficient**: Optimized Rust with LTO and codegen optimizations
+- **Privacy-focused**: No telemetry or data collection
+- **Cross-platform**: Linux, Windows, and macOS support (with optional features)
+
+### Optional Features
+
+#### Catalog Automation (`catalog-update`)
+- **Steam API integration**: Fetch game metadata from Steam
+- **ProtonDB integration**: Get Linux compatibility ratings
+- **Dynamic catalog updates**: `--update-catalog` command to refresh game database
+- **Enhanced metadata**: Release dates, engine info, Proton ratings
+
+#### Enhanced Hardware Detection (`windows-detection`, `macos-detection`)
+- **Windows support**: WMI-based hardware detection on Windows
+- **macOS support**: sysctl and system_profiler integration on macOS
+- **Platform-specific optimizations**: Tailored detection for each OS
+
+#### Advanced Assessment (`advanced-assessment`)
+- **Multi-factor assessment**: CPU single-core vs multi-core consideration
+- **GPU architecture awareness**: Ray tracing and VRAM pressure analysis
+- **Game-specific optimizations**: CPU-intensive game detection
+
+#### Configuration (`config`)
+- **User configuration**: Persistent settings in `~/.config/ciri/config.toml`
+- **Custom presets**: Save and load custom quality presets
+- **Behavior tuning**: Adjust assessment aggressiveness and thresholds
 
 ## Use
+
+### Basic Usage
 
 ```bash
 ciri "Batman Arkham Knight"
@@ -31,7 +81,23 @@ ciri bg3 --explain
 ciri --list
 ```
 
-Supported targets are `720p`, `1080p` (default), `1440p`, and `4k`. `--explain` (also `--json`) emits versioned JSON suitable for scripts. Exit code `2` means invalid CLI usage and `3` means no game matched.
+### With Catalog Updates
+
+```bash
+# Update catalog from online sources
+ciri --update-catalog
+
+# Then use updated catalog
+ciri "New Game"
+```
+
+### Supported Targets
+- `720p`, `1080p` (default), `1440p`, `4k`
+
+### Output Formats
+- `--explain` / `--json`: Machine-readable JSON for scripts
+- Exit code `2`: Invalid CLI usage
+- Exit code `3`: No game matched
 
 ## How the assessment works
 
@@ -41,7 +107,29 @@ FPS values are heuristic estimates, not benchmarks. They are derived from CPU an
 
 The catalog is deliberately embedded so the command works without network access and produces deterministic answers. The first release includes Batman: Arkham Knight, Cyberpunk 2077, Elden Ring, Baldur's Gate 3, Grand Theft Auto V, and The Witcher 3.
 
+## Architecture
+
+Ciri is designed with a modular architecture that maintains zero-dependency principles while enabling optional features:
+
+```
+src/
+├── assess/           # Assessment logic
+├── catalog/          # Game catalog management
+│   ├── embedded.rs   # Offline embedded catalog
+│   ├── steam_api.rs  # Steam integration (optional)
+│   ├── protondb.rs   # ProtonDB integration (optional)
+│   └── updater.rs    # Catalog updates (optional)
+├── hardware/         # Hardware detection
+│   ├── linux.rs      # Linux detection (default)
+│   ├── windows.rs    # Windows detection (optional)
+│   └── macos.rs      # macOS detection (optional)
+├── config.rs         # User configuration (optional)
+└── output.rs         # Output formatting
+```
+
 ## Develop
+
+### Basic Development
 
 ```bash
 cargo fmt --check
@@ -50,7 +138,39 @@ cargo clippy --all-targets -- -D warnings
 cargo build --release
 ```
 
-The project intentionally has no third-party Rust dependencies.
+### With All Features
+
+```bash
+cargo test --all-targets --features full
+cargo clippy --all-targets --features full -- -D warnings
+cargo build --release --features full
+```
+
+### Feature Testing
+
+Test specific feature combinations:
+
+```bash
+# Test catalog update features
+cargo test --features catalog-update
+
+# Test Windows detection
+cargo test --features windows-detection
+
+# Test full feature set
+cargo test --features full
+```
+
+## Philosophy
+
+Ciri maintains a strong commitment to:
+
+1. **Zero-dependency core**: Core functionality works without external dependencies
+2. **Offline-first design**: Primary use case doesn't require network access
+3. **Privacy by default**: No telemetry or data collection without explicit consent
+4. **Optional enhancements**: Advanced features available via feature flags
+5. **Performance optimization**: Fast startup and low memory footprint
+6. **Cross-platform support**: Works on Linux, Windows, and macOS
 
 ## License
 

@@ -1,6 +1,9 @@
 use crate::catalog::{Game, LinuxSupport, Tier};
 use crate::hardware::Hardware;
 
+#[cfg(feature = "advanced-assessment")]
+pub mod multi_factor;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Verdict {
     Run,
@@ -192,7 +195,7 @@ pub fn canonical_target(target: &str) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::catalog::GAMES;
+    use crate::catalog::embedded::GAMES;
 
     fn hardware(cpu: u16, gpu: u16, ram: u16, vram: Option<u16>) -> Hardware {
         Hardware {

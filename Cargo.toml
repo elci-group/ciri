@@ -1,11 +1,39 @@
 [package]
 name = "ciri"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 description = "An offline, hardware-aware game compatibility assessor"
 license = "MIT"
 
 [dependencies]
+# Core dependencies - only enabled with feature flags
+serde = { version = "1.0", optional = true, features = ["derive"] }
+serde_json = { version = "1.0", optional = true }
+reqwest = { version = "0.11", optional = true, default-features = false, features = ["rustls-tls"] }
+tokio = { version = "1.0", optional = true, features = ["rt-multi-thread", "macros"] }
+dirs = { version = "5.0", optional = true }
+toml = { version = "0.8", optional = true }
+chrono = { version = "0.4", optional = true }
+urlencoding = { version = "2.1", optional = true }
+
+[features]
+default = []
+# Catalog automation features
+steam = ["serde", "serde_json", "reqwest", "tokio", "urlencoding"]
+protondb = ["serde", "serde_json", "reqwest", "tokio"]
+catalog-update = ["steam", "protondb", "serde", "serde_json", "tokio", "chrono"]
+# Enhanced hardware detection
+windows-detection = []
+macos-detection = []
+advanced-assessment = []
+benchmark = []
+# Configuration features
+config = ["dirs", "toml", "serde"]
+profiles = ["config"]
+# Output customization
+custom-output = ["serde", "serde_json"]
+# Full feature set
+full = ["catalog-update", "config", "profiles", "custom-output", "advanced-assessment"]
 
 [profile.release]
 strip = true

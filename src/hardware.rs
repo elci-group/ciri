@@ -1,6 +1,11 @@
 use std::fs;
 use std::process::Command;
 
+#[cfg(feature = "windows-detection")]
+pub mod windows;
+#[cfg(feature = "macos-detection")]
+pub mod macos;
+
 #[derive(Clone, Debug)]
 pub struct Hardware {
     pub cpu_name: String,
@@ -19,6 +24,29 @@ pub struct Hardware {
 
 impl Hardware {
     pub fn detect() -> Self {
+        #[cfg(target_os = "linux")]
+        {
+            Self::detect_linux()
+        }
+        
+        #[cfg(target_os = "windows")]
+        {
+            Self::detect_windows()
+        }
+        
+        #[cfg(target_os = "macos")]
+        {
+            Self::detect_macos()
+        }
+        
+        #[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]
+        {
+            Self::detect_fallback()
+        }
+    }
+    
+    #[cfg(target_os = "linux")]
+    fn detect_linux() -> Self {
         let cpuinfo = fs::read_to_string("/proc/cpuinfo").unwrap_or_default();
         let cpu_name = cpuinfo
             .lines()
@@ -62,9 +90,103 @@ impl Hardware {
             ram_gb,
             storage_gb,
             os,
-            is_linux: cfg!(target_os = "linux"),
+            is_linux: true,
             is_laptop,
             vulkan,
+        }
+    }
+    
+    #[cfg(target_os = "windows")]
+    fn detect_windows() -> Self {
+        #[cfg(feature = "windows-detection")]
+        {
+            use windows as win;
+            
+            let (cpu_name, cores, logical_cores) = win::detect_cpu_info()
+                .unwrap_or_else(|| ("Unknown CPU".to_string(), 4, 4));
+            let cpu_score = cpu_score(&cpu_name, logical_cores);
+            
+            let (gpu_name, gpu_score, vram_gb) = win::detect_gpu_info()
+                .unwrap_or_else(|| ("Unknown GPU".to_string(), 0, None));
+            
+            let ram_gb = win::detect_memory_gb().unwrap_or(8);
+            let storage_gb = win::detect_storage_gb().unwrap_or(0);
+            
+            Self {
+                cpu_name,
+                cpu_score,
+                logical_cores,
+                gpu_name,
+                gpu_score,
+                vram_gb,
+                ram_gb,
+                storage_gb,
+                os: "Windows".to_string(),
+                is_linux: false,
+                is_laptop: false, // Could detect via battery status
+                vulkan: false, // Could detect via Vulkan loader
+            }
+        }
+        
+        #[cfg(not(feature = "windows-detection"))]
+        {
+            Self::detect_fallback()
+        }
+    }
+    
+    #[cfg(target_os = "macos")]
+    fn detect_macos() -> Self {
+        #[cfg(feature = "macos-detection")]
+        {
+            use macos as mac;
+            
+            let (cpu_name, cores, logical_cores) = mac::detect_cpu_info()
+                .unwrap_or_else(|| ("Unknown CPU".to_string(), 4, 4));
+            let cpu_score = cpu_score(&cpu_name, logical_cores);
+            
+            let (gpu_name, gpu_score, vram_gb) = mac::detect_gpu_info()
+                .unwrap_or_else(|| ("Unknown GPU".to_string(), 0, None));
+            
+            let ram_gb = mac::detect_memory_gb().unwrap_or(8);
+            let storage_gb = mac::detect_storage_gb().unwrap_or(0);
+            
+            Self {
+                cpu_name,
+                cpu_score,
+                logical_cores,
+                gpu_name,
+                gpu_score,
+                vram_gb,
+                ram_gb,
+                storage_gb,
+                os: "macOS".to_string(),
+                is_linux: false,
+                is_laptop: true, // Most Macs are laptops
+                vulkan: false, // Could detect via Vulkan loader
+            }
+        }
+        
+        #[cfg(not(feature = "macos-detection"))]
+        {
+            Self::detect_fallback()
+        }
+    }
+    
+    #[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]
+    fn detect_fallback() -> Self {
+        Self {
+            cpu_name: std::env::consts::ARCH.to_string(),
+            cpu_score: 50,
+            logical_cores: 4,
+            gpu_name: "Unknown GPU".to_string(),
+            gpu_score: 0,
+            vram_gb: None,
+            ram_gb: 8,
+            storage_gb: 0,
+            os: std::env::consts::OS.to_string(),
+            is_linux: false,
+            is_laptop: false,
+            vulkan: false,
         }
     }
 }

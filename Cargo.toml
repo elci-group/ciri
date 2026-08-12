@@ -1,0 +1,13 @@
+[package]
+name = "ciri"
+version = "0.1.1"
+edition = "2021"
+description = "An offline, hardware-aware game compatibility assessor"
+license = "MIT"
+
+[dependencies]
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

@@ -1,0 +1,5 @@
+/target/
+/memory/
+/.kaptaind/
+*.swp
+*.tmp
